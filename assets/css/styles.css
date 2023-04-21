@@ -1,0 +1,13 @@
+a:hover {
+  color: var(--bs-link-hover-color);
+  /*text-decoration: none;*/
+}
+
+.a-signup {
+  text-decoration: none;
+}
+
+.nav-dropdown {
+  text-decoration: none;
+}
+
