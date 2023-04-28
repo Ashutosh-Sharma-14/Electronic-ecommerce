@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt');
+const User = require('../models/userSchema');
 
 router.get("/",(req,res) => {
     console.log("File send to home page")
@@ -8,12 +10,17 @@ router.get("/",(req,res) => {
 
 router.get("/login",(req,res) => {
     console.log('currently at login page');
-  res.sendFile("D:/SEM 6/ESD-ecommerce/pages/login.html");
+  res.sendFile("D:/SEM 6/ESD-ecommerce/pages/login/login.html");
 });
 
 router.get("/cart",(req,res) =>{
     console.log("Seeing products in the cart")
   res.sendFile("D:/SEM 6/ESD-ecommerce/pages/cart.html");
+});
+
+router.get("/mobiles",(req,res) =>{
+  console.log("Mobiles to buy")
+res.sendFile("D:/SEM 6/ESD-ecommerce/pages/mobiles.html");
 });
 
 router.get("/register",(req,res) => {
@@ -22,7 +29,7 @@ router.get("/register",(req,res) => {
 });
 
 // saving the data obtained from the registration form to the database
-router.post("/register",function(req,res){
+router.post("/register",(req,res) => {
     const {first_name, last_name, email, password} = req.body;
   
     // generating the salt for encryption
@@ -40,18 +47,41 @@ router.post("/register",function(req,res){
           res.status(500).send('Internal server error');
           return;
         }
+
+        let newUser = new User({
+            first_name,
+            last_name,
+            email,
+            password:hash
+          });
+    
+        newUser.save();
+        res.redirect('/login');
+        
       })
-  
-      const newUser = new User({
-        first_name,
-        last_name,
-        email,
-        password: hash
-      });
-  
     })
-    newUser.save();
-    res.redirect('/')
+  })
+
+router.post('/login',async (req,res) =>{
+    let LoginUser = new User({
+      email: req.body.email,
+      password: req.body.password
+    })
+
+    const hashedPassword = bcrypt.hash(password,10);
+
+    // find user with the given email and password
+    const user = await LoginUser.findOne({email,password});
+    console.log(user)
+  
+    if (user.email == email && user.password == hashedPassword) {
+      // User found, authentication successful
+      res.send('Authentication successful');
+      res.redirect("/home")
+    } else {
+      // User not found, authentication failed
+      res.send('Authentication failed');
+    }
   })
 
 module.exports = router;
